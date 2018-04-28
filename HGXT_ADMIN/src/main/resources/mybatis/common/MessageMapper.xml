@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MessageMapper">
+	
+	
+	<!-- 获取所有推送过的消息 -->
+	<select id="getAllMessage" parameterType="pd"  resultType="com.mcfish.entity.common.Message">
+		select
+			a.*,
+			b.*,
+			b.id as rid,
+			b.status as rstatus,
+			b.create_time as rcreate_time,
+			(
+				SELECT 
+					count(a.id) 
+				from 
+					tb_system_message as a
+					left join tb_user_message as b on a.id = b.msg_id
+				<where>
+					<if test="keyword != null and keyword != ''">
+						and (a.title like CONCAT('%',#{keyword},'%'))
+					</if>
+					<if test="status != null and status != ''">
+						and a.status = #{status}
+					</if>
+					and a.from &lt; 10
+				</where>
+				order by a.create_time desc 
+			) as total
+		from 
+			tb_system_message as a
+			left join tb_user_message as b on a.id = b.msg_id
+		<where>
+			<if test="keyword != null and keyword != ''">
+				and (a.title like CONCAT('%',#{keyword},'%'))
+			</if>
+			<if test="status != null and status != ''">
+				and a.status = #{status}
+			</if>
+			and a.from &lt; 10
+		</where>
+		order by a.create_time desc 
+		<if test="length != null  and length!='' and length != -1">
+		    limit #{start},#{length}
+		</if>
+	
+	</select>
+	
+	
+	<!-- 删除消息 -->
+	<delete id="deleteMessage" parameterType="pd" >
+		delete 
+		from 
+			tb_system_message 
+		where 
+			id = #{id}
+	</delete>
+	
+	
+	<!-- 根据id查询推送消息 -->
+	<select id="getMessageById" parameterType="int" resultType="com.mcfish.entity.common.Message">
+		select
+			a.*,
+			b.*,
+			b.id as rid,
+			b.status as rstatus,
+			b.create_time as rcreate_time
+		from 
+			tb_system_message as a
+			left join tb_user_message as b on a.id = b.msg_id
+		<where>
+			a.id = #{id}
+		</where>	
+	</select>
+	
+	
+	<!-- 编辑消息推送 -->
+	<update id="updatMessage" parameterType="pd">
+		update
+			tb_system_message
+		<set>
+			`title` = #{title},
+			image   = #{image},
+			content = #{content}
+		</set>
+	</update>
+	
+	<!-- 新增消息内容-->          
+	<insert id="addMessage"  keyProperty="id"  useGeneratedKeys="true" parameterType="pd" >
+		insert into 
+			tb_system_message
+				(`from`, title, image, content) 
+			values
+				(0, #{title}, #{image}, #{content})
+	</insert>
+	
+	
+	<!-- 推送消息 -->
+	<insert id="addUserMessage" parameterType="pd">
+		insert into 
+		tb_user_message
+			(user_id, msg_id , ext) 
+		values
+			<foreach collection="uids" open="(" separator="," close=")" item="uid">
+				#{uid}, #{msg_id} ,#{ext}
+			</foreach>
+	</insert>
+	
+</mapper>

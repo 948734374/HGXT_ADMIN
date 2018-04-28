@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasicMapper">
+	
+	<!-- 获取所有菜单 -->
+	<select id="getAllMenuList"  resultType="com.mcfish.entity.common.Menu">
+		SELECT  
+			*  
+		FROM  
+			tb_system_menu 
+		where 
+			status = 1 
+		ORDER BY order_num  
+	</select>
+	
+	
+	<!-- 查询权限内的菜单 -->
+	<select id="getMenuList" resultType="com.mcfish.entity.common.Menu" parameterType="String">
+		SELECT  
+			*  
+		FROM  
+			tb_system_menu  
+		WHERE 
+			id IN 
+			<foreach collection="array" item="menuId" open="(" separator="," close=")">
+				#{menuId}
+			</foreach>
+	</select>
+	
+	
+	<!-- 获取系统所有菜单，管理员设置模块中设置权限时用  -->
+	<select id="getAllMenu" resultType="com.mcfish.entity.common.Menu">
+		select
+			id,
+			name
+		from
+			tb_system_menu
+		<where>
+			status = 1
+		</where>
+	</select>
+	
+	
+	<!--查询登录页关键字 -->
+	<select id="getLoginKeyWord" resultType="map">
+		SELECT
+			`key`, 
+			value
+		from 
+			tb_system_config 
+		where 
+			`key` = 'logo' 
+			or `key` = 'project' 
+			or `key` = 'copyright' 
+			or `key` = 'login_background' 
+			or `key` = 'index_background'
+	</select>
+	
+	
+	<!-- 添加操作记录 -->
+	<insert id="addOperateLog" parameterType="com.mcfish.entity.common.OperateLog">
+		INSERT INTO  tb_admin_log  
+			(`admin_id`, `ip`, `action`, `comment`, `creator`) 
+		VALUES  
+			(#{admin_id},  #{ip}, #{action}, #{comment}, #{creator}) ;
+	</insert>
+	
+	
+	<!--获取操作日志 -->
+	<select id="getAllLogs" parameterType="pd" resultType="com.mcfish.entity.common.OperateLog">
+		SELECT 
+			* 
+		FROM 
+			tb_admin_log 
+		order by create_time desc 
+		LIMIT #{start},#{length} 
+	</select>
+	
+	
+	<!--获取操作日志总数 -->
+	<select id="getAllLogsCount" parameterType="pd" resultType="int">
+		SELECT 
+			count(id) 
+		FROM 
+			tb_admin_log
+	</select>
+	
+</mapper>

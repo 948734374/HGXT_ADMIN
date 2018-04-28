@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="devCouponMapper" >
+	
+	<!-- 添加抵扣券 -->
+	<insert id="addDevCoupons" parameterType="pd">
+	INSERT into tb_dev_coupon(code,image,brief,url,worth_money,worth_time,begin,end,number,status,create_time) VALUES (#{code},#{image},#{brief},#{url},#{worthMoney},#{worthTime},#{begin},#{end},#{number},#{status},#{createTime})
+	</insert>
+	
+	
+	<!-- 查询所有抵扣券 -->
+	<select id="getAllDedCoupons"  parameterType="pd" resultType="com.mcfish.entity.common.Coupon">
+	SELECT code,image,brief,url,worth_money as worthMoney,worth_time as worthTime,date_format(`begin` ,'%Y-%m-%d %h:%i:%s') as `begin`,date_format(`end` ,'%Y-%m-%d %h:%i:%s') as  end ,number,toked as taked,CASE `status` when 0 then '上线' ELSE '下线' end as statusStr   from tb_dev_coupon WHERE 1=1 
+	 <if test="status!=null and status!='' and status!='全部' ">
+      and  status=#{status}
+      </if>
+      order by create_time desc limit #{start},#{length} 
+	</select>
+	
+	
+	<!-- 根据code查询抵扣券 -->
+	<select id="queryDedCouponsByCode" parameterType="pd" resultType="com.mcfish.entity.common.Coupon">
+	select code,image,brief,url,worth_money as worthMoney,worth_time as worthTime,date_format(`begin` ,'%Y-%m-%d %h:%i:%s') as `begin`,date_format(`end` ,'%Y-%m-%d %h:%i:%s') as  end,number, toked as taked,status  from tb_dev_coupon where code=#{code}
+	</select>
+	
+	
+	<!-- 根据code修改抵扣券 -->
+	<update id="updateDedCouponByCode" parameterType="pd">
+	update tb_dev_coupon set image=#{image},brief=#{brief},url=#{url},worth_money=#{worthMoney},worth_time=#{worthTime},begin=#{begin},end=#{end},number=#{number},toked=#{take},status=#{status}  where code=#{code}
+	</update>
+	
+	
+	<!-- 修改抵扣券状态 -->
+	<update id="updateDedCouponStatusByCode" parameterType="pd">
+	update tb_dev_coupon  set  status=#{status}  where code=#{code}
+	</update>
+	
+	<!-- 删除抵扣券 -->
+	<delete id="deleteDedCouponByCode" parameterType="pd">
+	  delete from tb_dev_coupon where  code=#{code}
+	</delete>
+	
+	<!-- 获取抵扣券数量 -->
+	<select id="getAllDedCouponsCount" parameterType="pd"  resultType="int">
+	SELECT  count(code)  from tb_dev_coupon WHERE 1=1 
+	 <if test="status!=null and status!='' and status!='全部' ">
+      and  status=#{status}
+      </if>
+	</select>
+	
+	
+</mapper>

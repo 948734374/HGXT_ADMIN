@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="couponMapper" >
+	
+	<!-- 添加优惠券  -->
+	<insert id="addCoupon" parameterType="pd">
+		insert into tb_coupon
+			(code, image, logo, brief, url, number, `begin`, `end`, `status`)
+		values
+			(#{code}, #{image}, #{logo}, #{brief}, #{url}, #{number}, #{begin}, #{end}, #{status})
+	</insert>
+
+	
+	<!-- 获取所有优惠券 -->
+	<select id="getAllCoupons" parameterType="pd" resultType="com.mcfish.entity.common.Coupon">
+		select 
+			*,
+			(
+				select 
+					count(id)
+				from
+					tb_coupon
+				<where>
+					<if test="status != null and status != ''">
+						and status = #{status}
+					</if>
+					<if test="keyword != null and keyword != ''">
+						and (id like CONCAT('%',#{keyword},'%') or code like CONCAT('%',#{keyword},'%'))
+					</if>
+				</where>
+				order by create_time desc
+			) as total
+		from
+			tb_coupon
+		<where>
+			<if test="status != null and status != ''">
+				and status = #{status}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				and (id like CONCAT('%',#{keyword},'%') or code like CONCAT('%',#{keyword},'%'))
+			</if>
+		</where>
+		order by create_time desc
+		<if test="length != null  and length!='' and length != -1">
+		    limit #{start},#{length}
+		</if>	
+		
+	</select>
+	
+	
+	<!-- 删除优惠券 -->
+	<delete id="deleteCoupon" parameterType="pd">
+		delete 
+		from 
+			tb_coupon 
+		where 
+			id = #{id}
+	</delete>
+	
+	
+	<!-- 查询优惠券详情 -->
+	<select id="getCouponInfo" parameterType="pd" resultType="com.mcfish.entity.common.Coupon">	
+		select 
+			*
+		from
+			tb_coupon
+		where
+			id = #{id}
+	</select>
+	
+	
+	<!-- 更新优惠券 -->
+	<update id="updateCoupon"  parameterType="pd">
+		update 
+			tb_coupon 
+		<trim prefix="set" suffixOverrides="," >
+			<if test="code != null and code != ''">
+				code = #{code},
+			</if>
+			<if test="image != null and image != ''">
+				image = #{image},
+			</if>
+			<if test="logo != null and logo != ''">
+				logo = #{logo},
+			</if>
+			<if test="brief != null and brief != ''">
+				brief = #{brief},
+			</if>
+			<if test="url != null and url != ''">
+				url = #{url},
+			</if>
+			<if test="number != null and number != ''">
+				number = #{number},
+			</if>
+			<if test="taked != null and taked != ''">
+				`taked` = #{taked},
+			</if>
+			<if test="begin != null and begin != ''">
+				`begin` = #{begin},
+			</if>
+			<if test="end != null and end != ''">
+				`end` = #{end},
+			</if>
+			<if test="status != null and status != ''">
+				status = #{status},
+			</if>
+		</trim>
+		where 
+			id = #{id}
+	</update>
+</mapper>

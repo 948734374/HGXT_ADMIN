@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AdminMapper">
+
+
+	<!-- 查询所有管理员 -->
+	<select id="getAdminList" parameterType="pd" resultType="com.mcfish.entity.common.Admin">
+		select
+			*,
+			(
+				select
+					count(id)
+				from
+					tb_admin
+				<where>
+					<if test="status != null and status!='' ">
+						and status = #{status}
+					</if>
+					<if test="keyword != null and keyword!='' ">
+						and ( account like CONCAT('%', #{keyword}, '%') or name LIKE CONCAT('%', #{keyword}, '%') or phone LIKE CONCAT('%', #{keyword}, '%') )
+					</if>
+				</where>
+			) as total
+		from
+			tb_admin
+		<where>
+			<if test="status != null and status!='' ">
+				and status = #{status}
+			</if>
+			<if test="keyword != null and keyword!='' ">
+				and ( account like CONCAT('%', #{keyword}, '%') or name LIKE CONCAT('%', #{keyword}, '%') or phone LIKE CONCAT('%', #{keyword}, '%') )
+			</if>
+		</where>
+		<if test="length != null and length!='' and length != -1">
+			limit #{start},#{length}
+		</if>
+	</select>
+
+
+	<!-- 通过用户账号获取账号信息 -->
+	<select id="getUserByUserAccount" parameterType="String" resultType="com.mcfish.entity.common.Admin">
+		select
+			*
+		from
+			tb_admin a
+			left join tb_admin_role b on a.role_id = b.id
+		where
+			a.account = #{account}
+	</select>
+
+
+	<!--渠道上登录验证 -->
+	<select id="getAgentByPhone" parameterType="String" resultType="com.mcfish.entity.common.Agent">
+		select
+			*
+		from
+			tb_agent
+		where
+			phone = #{account}
+	</select>
+
+
+	<!-- 根据id查询管理员 -->
+	<select id="getAdminById" parameterType="Integer" resultType="com.mcfish.entity.common.Admin">
+		select
+			*
+		from
+			tb_admin a
+			left join tb_admin_role b on a.role_id = b.id
+		where
+			a.id = #{id}
+	</select>
+
+
+	<!-- 根据id删除 -->
+	<delete id="deleteAdmin" parameterType="int">
+		delete
+		from
+			tb_admin_role
+		where
+			id = #{id}
+	</delete>
+
+
+	<!-- 为新的管理员添加角色  -->
+	<insert id="addNewAdminRole" keyProperty="role_id" useGeneratedKeys="true" parameterType="com.mcfish.entity.common.Admin">
+		INSERT INTO 
+			tb_admin_role
+			(role, comment)
+		VALUES
+			("普通管理员", "系统添加的管理员")
+	</insert>
+	
+	
+	<!-- 添加管理员 -->
+	<insert id="addAdmin" parameterType="pd">
+		INSERT INTO tb_admin
+			(name, role_id, account, password, phone, comment)
+		VALUES
+			(#{username}, #{role_id}, #{account}, #{password},#{phone},#{comment})
+	</insert>
+
+
+	<!-- 重置密码123456 -->
+	<update id="updatePwd" parameterType="pd">
+		UPDATE tb_admin
+		SET
+			password = #{password}
+		WHERE
+			id = #{id}
+	</update>
+
+
+	<!-- 修改账号状态 -->
+	<update id="updateStatus" parameterType="pd">
+		UPDATE 
+			tb_admin
+		SET
+			status = #{status}
+		WHERE
+			id = #{id}
+	</update>
+
+
+	<!-- 修改账号信息 -->
+	<update id="updateById" parameterType="pd">
+		UPDATE 
+			tb_admin
+		<set>
+			name = #{username} ,
+			phone = #{phone},
+			comment = #{comment}
+		</set>
+		<where>
+			id = #{id}
+		</where>
+	</update>
+
+
+	<!-- 修改密码 -->
+	<update id="updateAdminPassword" parameterType="com.mcfish.entity.common.Admin">
+		UPDATE
+			tb_admin
+		SET
+			password = #{password}
+		WHERE
+			account = #{account}
+	</update>
+
+
+	<!-- 修改权限 -->
+	<update id="updateAuthStr" parameterType="pd">
+		UPDATE 
+			tb_admin a
+			left join tb_admin_role b on a.role_id = b.id
+		SET
+			b.views = #{views},
+			b.edits = #{edits}
+		WHERE
+			a.id = #{id}
+	</update>
+
+</mapper>

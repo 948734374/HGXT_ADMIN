@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OperMapper">
+
+	<!-- 获取banner列表数据 -->
+	<select id="getAllBanners" parameterType="pd" resultType="com.mcfish.entity.common.Banner">
+		select
+			*,
+			(
+				select
+					count(id)
+				from
+					tb_app_banner
+				<where>
+					<if test="status != null and status != ''">
+						and status = #{status}
+					</if>
+					<if test="keyword != null and keyword != ''">
+						and (title like CONCAT('%',#{keyword},'%') or id like CONCAT('%',#{keyword},'%'))
+					</if>
+				</where>
+				order by create_time desc
+			) as total
+		from
+			tb_app_banner
+		<where>
+			<if test="status != null and status != ''">
+				and status = #{status}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				and (title like CONCAT('%',#{keyword},'%') or id like CONCAT('%',#{keyword},'%'))
+			</if>
+		</where>
+		order by create_time desc
+		<if test="length != null  and length!='' and length != -1">
+		    limit #{start},#{length}
+		</if>
+	</select>
+		
+
+	<!-- 添加banner -->
+	<insert id="addBanner" parameterType="pd">
+		insert into 
+			tb_app_banner
+				(title, pos, image, url, data, begin, end)
+			VALUES
+				(#{title}, #{pos}, #{image}, #{url} , #{diyData},#{startTime},#{endTime})
+	</insert>
+
+
+	<!-- 根据id查询banner信息 -->
+	<select id="getBanner" parameterType="pd" resultType="com.mcfish.entity.common.Banner">
+		select
+			*
+		from
+			tb_app_banner
+		where
+			id = #{id}
+	</select>
+
+
+	<!--更新banner -->
+	<update id="updateBanner" parameterType="pd">
+		update 
+			tb_app_banner
+		<trim prefix="set" suffixOverrides="," >
+			<if test="title != null and title != ''">
+				title = #{title},
+			</if>
+			<if test="pos != null and pos != ''">
+				pos = #{pos},
+			</if>
+			<if test="image != null and image != ''">
+				image	= #{image},
+			</if>
+			<if test="url != null and url != ''">
+				url = #{url},
+			</if>
+			<if test="diyData != null and diyData != ''">
+				data = #{diyData},
+			</if>
+			<if test="startTime != null and startTime != ''">
+				`begin` = #{startTime},
+			</if>
+			<if test="endTime != null and endTime != ''">
+				end = #{endTime},
+			</if>
+			<if test="status != null and status != ''">
+				status = #{status},
+			</if>
+		</trim>
+		where 
+			id = #{id}
+	</update>
+
+
+	<!-- 删除banner -->
+	<delete id="deleteBanner" parameterType="pd">
+		delete 
+		from 
+			tb_app_banner 
+		where 
+			id = #{id}
+	</delete>
+
+
+
+
+
+	<!-- 获取所有引导页 -->
+	<select id="getAllGuide" parameterType="pd" resultType="com.mcfish.entity.common.Guide">
+		select 
+			*,
+			(
+				select 
+					count(id)
+				from 
+					tb_app_guide
+				<where>
+					<if test="status != null and status != ''">
+						and status = #{status}
+					</if>
+					<if test="keyword != null and keyword != ''">
+						and (id like CONCAT('%',#{keyword},'%'))
+					</if>
+				</where>
+				order by order_num asc
+				<if test="length != null  and length!='' and length != -1">
+				    limit #{start},#{length}
+				</if>
+			) as total
+		from 
+			tb_app_guide
+		<where>
+			<if test="status != null and status != ''">
+				and status = #{status}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				and (id like CONCAT('%',#{keyword},'%'))
+			</if>
+		</where>
+		order by order_num asc
+		<if test="length != null  and length!='' and length != -1">
+		    limit #{start},#{length}
+		</if>
+	</select>
+
+
+	<!-- 更新引导页 -->
+	<update id="updateGuide" parameterType="pd">
+		update 
+			tb_app_guide 
+		<trim prefix="set" suffixOverrides="," >
+			<if test="image != null and image != ''">
+				image = #{image},
+			</if>
+			<if test="comment != null and comment != ''">
+				`comment`	= #{comment},
+			</if>
+			<if test="status!=null and status!=''">
+				status = #{status},
+			</if>
+		</trim>
+		where 
+			id=#{id}
+	</update>
+
+
+	<!-- 获取引导详情 -->
+	<select id="getGuide" parameterType="pd" resultType="com.mcfish.entity.common.Guide">
+		select 
+			* 
+		from 
+			tb_app_guide
+		where 
+			id = #{id}
+	</select>
+	
+	
+	<!-- 删除引导页  -->
+	<delete id="deleteGuide">
+		delete
+		from
+			tb_app_guide
+		<where>
+			id = #{id}
+		</where>
+	</delete>
+	
+	
+	<!-- 获取所有app版本信息列表  -->
+	<select id="selectAllApp" parameterType="pd" resultType="com.mcfish.entity.common.Version">
+		SELECT 
+			*,
+			(
+				SELECT 
+					count(id) 
+				from
+					tb_app_version 
+				ORDER BY create_time desc
+			) as total
+		from
+			tb_app_version 
+		ORDER BY create_time desc
+		<if test="length != null  and length!='' and length != -1">
+		    limit #{start},#{length}
+		</if>
+	</select>
+	
+	
+	<!-- 修改app版本信息 -->
+	<update id="updateAppVersion" parameterType="pd">
+		update 
+			tb_app_version 
+		<trim prefix="set" suffixOverrides="," >
+			<if test="type != null and type != ''">
+				`type` = #{type},
+			</if>
+			<if test="version != null and version != ''">
+				version = #{version},
+			</if>
+			<if test="is_debug != null and is_debug != ''">
+				is_debug = #{is_debug},
+			</if>
+			<if test="is_force != null and is_force != ''">
+				is_force = #{is_force},
+			</if>
+			<if test="download != null and download != ''">
+				download = #{download},
+			</if>
+			<if test="comment != null and comment != ''">
+				comment = #{comment},
+			</if>
+		</trim>
+		where 
+			id = #{id}
+	</update>
+	
+	
+	<!--添加app版本 -->
+	<insert id="addAppVersion" parameterType="pd" >
+		insert into tb_app_version
+			(type,version,comment,is_debug,is_force,download) 
+		values
+			(#{type},#{version},#{comment},#{is_debug},#{is_force},#{download})
+	</insert>
+	
+	
+	<!-- 通过id获取版本信息 -->
+	<select id="getAppVersion" parameterType="pd"  resultType="com.mcfish.entity.common.Version">
+		SELECT 
+			* 
+		from 
+			tb_app_version 
+		where 
+			id = #{id}
+	</select>
+	
+</mapper>

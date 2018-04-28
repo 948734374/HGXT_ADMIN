@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="FeedbackMapper">
+	
+	<!-- 获取所有反馈信息 -->
+	<select id="getAllFeedbackInfo" parameterType="pd"  resultType="com.mcfish.entity.common.Feedback">
+		SELECT 
+			*,
+			b.name, 
+			b.phone,
+			(
+				select 
+					count(a.id) 
+				from
+					tb_user_feedback a 
+					left join tb_user b on a.user_id = b.id 
+				<where>
+					<if test="status != null and status != ''">
+						and a.status = #{status}
+					</if>
+					<if test="keyword != null and keyword != ''">
+						and (b.name like CONCAT('%',#{keyword},'%') or a.title like CONCAT('%',#{keyword},'%'))
+					</if>
+				</where>
+				order by a.create_time desc
+			) as total
+		from 
+			tb_user_feedback a 
+			left join tb_user b on a.user_id = b.id 
+		<where>
+			<if test="status != null and status != ''">
+				and a.status = #{status}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				and (b.name like CONCAT('%',#{keyword},'%') or a.title like CONCAT('%',#{keyword},'%'))
+			</if>
+		</where>
+		order by a.create_time desc
+		<if test="length != null  and length!='' and length != -1">
+		    limit #{start},#{length}
+		</if>
+	</select>
+	
+	
+	<!-- 修改意见状态  -->
+	<update id="updateFeedStatus" parameterType="pd">
+		update 
+			tb_user_feedback 
+		set 
+			status = #{status},
+			comment = #{comment} 
+		where id = #{id}
+	</update>
+	
+	<!--删除意见-->
+	<delete id="deleteFeed" parameterType="pd">
+		delete 
+		from 
+			tb_user_feedback 
+		where 
+			id = #{id}
+	</delete>
+	
+	
+</mapper>
